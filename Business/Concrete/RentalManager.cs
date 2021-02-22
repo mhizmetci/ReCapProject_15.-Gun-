@@ -1,6 +1,9 @@
 ﻿using Business.Abstract;
+using Business.Constants;
+using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
+using Entities.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,29 +19,50 @@ namespace Business.Concrete
             _rentalDal = rentalDal;
         }
 
-        public void Add(Rental rental)
+        public IResult Add(Rental rental)
         {
-            throw new NotImplementedException();
+            var result = _rentalDal.GetAll(r => r.CarId == rental.CarId && r.ReturnDate == null);
+            if (result.Count > 0)
+            {
+                return new ErrorResult(Messages.ResultError);
+            }
+            _rentalDal.Add(rental);
+            return new SuccessResult(Messages.ResultSuccess);
         }
 
-        public void Delete(Rental rental)
+        public IResult Delete(Rental rental)
         {
-            throw new NotImplementedException();
+            _rentalDal.Delete(rental);
+            return new SuccessResult();
         }
 
-        public List<Rental> GetAll()
+        public IResult DeliverCar(int Id, DateTime time)
         {
-            return _rentalDal.GetAll();
+            Rental rental = _rentalDal.Get(r => r.CarId == Id && r.ReturnDate == null);
+            rental.ReturnDate = time;
+            Update(rental);
+            return new SuccessResult();
         }
 
-        public Rental GetById(int customerId)
+        public IDataResult<List<Rental>> GetAll()
         {
-            return _rentalDal.Get(r => r.CustomerId == customerId);
+            return new SuccessDataResult<List<Rental>>(_rentalDal.GetAll());
         }
 
-        public void Update(Rental rental)
+        public IDataResult<Rental> GetById(int customerId)
         {
-            throw new NotImplementedException();
+            return new SuccessDataResult<Rental>(_rentalDal.Get(r => r.Id == customerId));
+        }
+
+        public IDataResult<List<RentalDetailDto>> GetRentalDetails()
+        {
+            return new SuccessDataResult<List<RentalDetailDto>>(_rentalDal.GetRentalDetails());
+        }
+
+        public IResult Update(Rental rental)
+        {
+            _rentalDal.Update(rental);
+            return new SuccessResult();
         }
     }
 }
