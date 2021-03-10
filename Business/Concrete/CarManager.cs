@@ -1,8 +1,13 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
+using Core.Aspects.Autofac.Transaction;
 using Core.Aspects.Autofac.Validation;
 using Core.CrossCuttingConcerns.Validation;
+using Core.Entities.Concrete;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.InMemory;
@@ -24,7 +29,9 @@ namespace Business.Concrete
             _carDal = carDal;
         }
 
+        [SecuredOperation("car.add,admin")]
         [ValidationAspect(typeof(CarValidator))]
+        [CacheRemoveAspect("ICarService.Get")]
         public IResult Add(Car car)
         {
             // business code
@@ -35,16 +42,30 @@ namespace Business.Concrete
 
         }
 
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Car car)
+        {
+            Add(car);
+            if (car.DailyPrice < 200)
+            {
+                throw new Exception("");
+            }
+            Add(car);
+            return null;
+        }
+
+        [SecuredOperation("car.delete,admin")]
         public IResult Delete(Car car)
         {
             _carDal.Delete(car);
             return new SuccessResult(Messages.CarDeleted);
         }
 
-        public IDataResult<List<Car>> GetAll()
+        [CacheAspect] // key,value
+        public IDataResult<List<Car>> GetAll()    // iş kodları yazılır  // tümünü listelemeye yetkisi var mı?
         {
-            // iş kodları yazılır
-            // tümünü listelemeye yetkisi var mı?
+           
+           
 
             if (DateTime.Now.Hour == 1)
             {
@@ -69,6 +90,9 @@ namespace Business.Concrete
             return new SuccessDataResult<List<Car>>(_carDal.GetAll(c => c.DailyPrice >= min && c.DailyPrice <= max));
         }
 
+
+        [CacheAspect]
+        [PerformanceAspect(5)]
         public IDataResult<Car> GetById(int Id)
         {
             return new SuccessDataResult<Car>(_carDal.Get(c => c.Id == Id));
@@ -79,6 +103,9 @@ namespace Business.Concrete
             return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails());
         }
 
+        [SecuredOperation("car.update,admin")]
+        [ValidationAspect(typeof(CarValidator))]
+        [CacheRemoveAspect("ICarService.Get")]
         public IResult Update(Car car)
         {
             if (car.CarName.Length < 2)
@@ -88,5 +115,15 @@ namespace Business.Concrete
             _carDal.Update(car);
             return new SuccessResult(Messages.CarUpdated);
         }
+
+        //public List<OperationClaim> GetClaims(User user)
+        //{
+        //    return _carDal.GetClaims(user);
+        //}
+
+        //public User GetByMail(string email)
+        //{
+        //    return _carDal.Get(u => u.Email == email);
+        //}
     }
 }

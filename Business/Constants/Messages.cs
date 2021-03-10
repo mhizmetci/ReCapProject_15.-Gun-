@@ -1,6 +1,8 @@
-﻿using Entities.Concrete;
+﻿using Core.Entities.Concrete;
+using Entities.Concrete;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Business.Constants
@@ -25,8 +27,18 @@ namespace Business.Constants
         public static string ColorDeleted = "Renk silindi";
         public static string ColorUpdated = "Renk güncellendi";
         public static string ColorLsted = "Renkler listelendi";
-        public static string ResultSuccess;
-        public static string ResultError;
-        
+        public static string ResultSuccess = "sonuç Başarılı";
+        public static string ResultError = "Sonuç Hatalı";
+        public static string AddedCarImage = "Araç resmi eklendi";
+        public static string DeletedCarImage ="Araç resmi silindi";
+        public static string FailedCarImageAdd = "Hatalı araç resmi eklemesi";
+        public static string FailAddedImageLimit = "Araç resmi limitinizi aştınız";
+        public static string  AuthorizationDenied = "Yetkiniz yok!";
+        public static string UserRegistered = "Kullanıcı Kabul edildi";
+        public static string UserNotFound = "kullanıcı bulunamadı";
+        public static string PasswordError = "Şifreniz hatalı";
+        public static string SuccessfulLogin = "Giriş başarılı";
+        public static string UserAlreadyExists = "Bu kullanıcı zaten var";
+        public static string AccessTokenCreated = "Erişim Token ı Oluşturuldu";
     }
 }
